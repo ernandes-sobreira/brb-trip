@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missão Brasília · jun/26</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1117;
+    --paper: #f7f5f0;
+    --accent: #1a5cff;
+    --accent2: #ff4a1c;
+    --accent3: #00b87a;
+    --warn: #e8a000;
+    --card: #ffffff;
+    --border: #e2ddd6;
+    --muted: #7a7570;
+    --budget-total: 2700;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    color: #fff;
+    padding: 28px 24px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .header h1 span { color: var(--accent); }
+  .header-meta {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+  }
+
+  .budget-pill {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .budget-pill .saldo { font-weight: 700; font-size: 1rem; }
+  .budget-pill .saldo.ok { color: var(--accent3); }
+  .budget-pill .saldo.warn { color: var(--warn); }
+  .budget-pill .saldo.over { color: var(--accent2); }
+
+  /* TABS */
+  .tabs {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 73px;
+    z-index: 90;
+  }
+  .tabs-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-inner::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 14px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-btn:hover:not(.active) { color: var(--ink); }
+
+  /* PANELS */
+  .main { max-width: 900px; margin: 0 auto; padding: 24px 16px 60px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* SECTION TITLE */
+  .sec-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sec-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 10px;
+  }
+  .card-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .card-row .card { flex: 1; min-width: 200px; }
+
+  /* TIMELINE */
+  .timeline { position: relative; }
+  .tl-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .tl-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 56px;
+    flex-shrink: 0;
+  }
+  .tl-time {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    margin-top: 14px;
+  }
+  .tl-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin: 4px auto 0;
+    flex-shrink: 0;
+  }
+  .tl-dot.key { background: var(--accent2); width: 13px; height: 13px; }
+  .tl-dot.rest { background: var(--accent3); }
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    margin: 0 auto;
+    min-height: 12px;
+  }
+  .tl-body {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    transition: box-shadow 0.15s;
+  }
+  .tl-body:hover { box-shadow: 0 2px 12px rgba(26,92,255,0.08); }
+  .tl-body.key-event { border-color: var(--accent2); border-left: 3px solid var(--accent2); }
+  .tl-body.transport { border-color: var(--accent); border-left: 3px solid var(--accent); }
+  .tl-body.hotel { border-color: var(--accent3); border-left: 3px solid var(--accent3); }
+  .tl-body.leisure { border-color: var(--warn); border-left: 3px solid var(--warn); }
+  .tl-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 100px;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+  .tag-event { background: #fff0ed; color: var(--accent2); }
+  .tag-transport { background: #eef2ff; color: var(--accent); }
+  .tag-hotel { background: #e8faf3; color: var(--accent3); }
+  .tag-leisure { background: #fff8e6; color: var(--warn); }
+  .tag-food { background: #f5f0ff; color: #7c3aed; }
+  .tl-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .tl-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.45; }
+
+  /* DAY LABEL */
+  .day-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    padding: 16px 0 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .day-label small {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* BUDGET TABLE */
+  .budget-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  .budget-table th {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+  }
+  .budget-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .budget-table tr:last-child td { border-bottom: none; }
+  .budget-table tr.fixed td { background: #fafaf8; }
+  .budget-table tr.estimated td { background: #f0f7ff; }
+  .budget-table tr.optional td { background: #fff8e6; }
+  .budget-table tr.total-row td {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 0;
+  }
+  .budget-table .val { text-align: right; font-weight: 500; white-space: nowrap; }
+  .budget-table .cat {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .cat-fixed { background: #e8f5e9; color: #2e7d32; }
+  .cat-est { background: #e3f2fd; color: #1565c0; }
+  .cat-opt { background: #fff3e0; color: #e65100; }
+
+  /* BUDGET SUMMARY BAR */
+  .budget-bar-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .budget-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+  .budget-bar-labels strong { color: var(--ink); font-size: 0.92rem; }
+  .budget-bar {
+    height: 10px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .budget-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--accent3);
+    transition: width 0.5s ease;
+  }
+  .budget-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .budget-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* EXPENSE INPUT */
+  .expense-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .expense-form h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr 80px; gap: 10px; align-items: end; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+  .form-group input, .form-group select {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    outline: none;
+    background: var(--paper);
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .btn-add {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: #1248d4; }
+  .btn-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 1rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.15s;
+  }
+  .btn-del:hover { color: var(--accent2); }
+
+  /* EXPENSE LIST */
+  .expense-list { list-style: none; }
+  .expense-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+  .expense-item:last-child { border-bottom: none; }
+  .expense-desc { flex: 1; }
+  .expense-cat { font-size: 0.7rem; color: var(--muted); }
+  .expense-val { font-weight: 600; white-space: nowrap; }
+
+  /* TIPS */
+  .tip-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+  }
+  .tip-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+  .tip-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .tip-body { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
+  .tip-body a { color: var(--accent); text-decoration: none; }
+  .tip-body a:hover { text-decoration: underline; }
+
+  /* RESERVATION INFO */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .info-label { font-size: 0.7rem; color: var(--muted); font-weight: 500; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .info-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--ink); }
+  .info-value small { font-size: 0.75rem; font-weight: 400; color: var(--muted); }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.1s;
+  }
+  .check-item:hover { background: #f7f5f0; }
+  .check-item:last-child { border-bottom: none; }
+  .check-item input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent3);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .check-item.done .check-text {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+  .check-text { font-size: 0.88rem; }
+  .check-sub { font-size: 0.75rem; color: var(--muted); display: block; }
+
+  /* ALERT BANNER */
+  .alert {
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.83rem;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    line-height: 1.5;
+  }
+  .alert-warn { background: #fff8e6; border: 1px solid #f5c842; color: #6b4e00; }
+  .alert-info { background: #eef2ff; border: 1px solid #b3c3ff; color: #1a3a80; }
+  .alert-ok { background: #e8faf3; border: 1px solid #80ddb8; color: #0a5c3a; }
+
+  /* NOTES */
+  .notes-area {
+    width: 100%;
+    min-height: 120px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    resize: vertical;
+    outline: none;
+    background: var(--paper);
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .notes-area:focus { border-color: var(--accent); }
+
+  .btn-save {
+    background: var(--accent3);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.15s;
+  }
+  .btn-save:hover { background: #00956a; }
+
+  @media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid .btn-add { grid-column: span 2; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>Missão <span>Brasília</span> · Jun 2026</h1>
+      <div class="header-meta">22–24 jun · OZPED Saint Moritz · Seminário CAPES/ODS</div>
+    </div>
+    <div class="budget-pill">
+      Saldo: <span class="saldo ok" id="header-saldo">R$ —</span>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tabs-inner">
+    <button class="tab-btn active" onclick="switchTab('roteiro')">📅 Roteiro</button>
+    <button class="tab-btn" onclick="switchTab('financeiro')">💰 Financeiro</button>
+    <button class="tab-btn" onclick="switchTab('evento')">🎓 Evento</button>
+    <button class="tab-btn" onclick="switchTab('passeios')">🗺 Brasília</button>
+    <button class="tab-btn" onclick="switchTab('docs')">📋 Docs</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- =================== ROTEIRO =================== -->
+  <div class="panel active" id="panel-roteiro">
+
+    <div class="day-label">Dom, 22 jun <small>dia 1 — viagem + check-in</small></div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">15:00</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body transport">
+          <span class="tl-tag tag-transport">Transporte</span>
+          <div class="tl-title">Saída para Aeroporto de Cuiabá (CGB)</div>
+          <div class="tl-desc">Chegue com ~2h de antecedência. Voo LATAM 3113 · localizador OEBOAF. Faça check-in online antes. Tarifa X-LIGHT: sem bagagem despachada.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">17:05</div><div class="tl-dot key"></div><div class="tl-line"></div></div>
+        <div class="tl-body transport key-event">
+          <span class="tl-tag tag-transport">✈ Voo</span>
+          <div class="tl-title">LATAM 3113 · CGB → BSB</div>
+          <div class="tl-desc">Duração: 1h40 · Chegada 19:45 em Brasília (BSB). Bilhete 9572289477388.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">19:45</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body transport">
+          <span class="tl-tag tag-transport">Transfer</span>
+          <div class="tl-title">Aeroporto → Hotel</div>
+          <div class="tl-desc">OZPED Flats · Setor Hoteleiro Norte, Asa Norte. ~30 min de táxi/Uber do BSB. Custo estimado R$ 60–80.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">20:30</div><div class="tl-dot rest"></div><div class="tl-line"></div></div>
+        <div class="tl-body hotel">
+          <span class="tl-tag tag-hotel">Hotel</span>
+          <div class="tl-title">Check-in · OZPED Flats Edifício Saint Moritz</div>
+          <div class="tl-desc">Check-in a partir das 15h. Confirme horário de acesso ao apartamento. Confirmação Booking: <strong>6051270032</strong> · PIN: 8763.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">21:30</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <span class="tl-tag tag-food">Refeição</span>
+          <div class="tl-title">Jantar — Asa Norte</div>
+          <div class="tl-desc">Várias opções próximas ao hotel. Comércio do SHN ou Asa Norte a pé. Orçar ~R$ 40–60.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-label">Seg, 23 jun <small>dia 2 — 1º dia do seminário</small></div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">07:30</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <span class="tl-tag tag-food">Manhã</span>
+          <div class="tl-title">Café da manhã + preparação</div>
+          <div class="tl-desc">Confira se o flat inclui café. Separe materiais: crachá, cartões de visita, notebook se necessário.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">09:00</div><div class="tl-dot key"></div><div class="tl-line"></div></div>
+        <div class="tl-body key-event">
+          <span class="tl-tag tag-event">🎓 Evento</span>
+          <div class="tl-title">Seminário ODS — Abertura · CAPES</div>
+          <div class="tl-desc">Setor Bancário Norte, Qd 2, Bloco L — Edifício CAPES. ~15 min do hotel (Uber ~R$ 20 ou caminhada pelo Eixo). Credenciamento antecipado.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">12:00</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <span class="tl-tag tag-food">Almoço</span>
+          <div class="tl-title">Almoço — Setor Bancário / Asa Norte</div>
+          <div class="tl-desc">Verifique se o evento oferece almoço. Alternativa: restaurantes da CLN 206/208. ~R$ 35–55.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">14:00</div><div class="tl-dot key"></div><div class="tl-line"></div></div>
+        <div class="tl-body key-event">
+          <span class="tl-tag tag-event">🎓 Evento</span>
+          <div class="tl-title">Seminário ODS — Tarde (sessões / mesas)</div>
+          <div class="tl-desc">Fique atento às sessões sobre pesquisa e extensão: oportunidade de networking com CESUPA, UnB e UFPR.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">18:00</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body leisure">
+          <span class="tl-tag tag-leisure">Tempo livre</span>
+          <div class="tl-title">Tarde livre — sugestões na aba Brasília</div>
+          <div class="tl-desc">Torre de TV, Museu Nacional ou Parque da Cidade ficam próximos. Ver aba 🗺 Brasília.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="day-label">Ter, 24 jun <small>dia 3 — 2º dia do seminário + retorno</small></div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">até 11:00</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body hotel">
+          <span class="tl-tag tag-hotel">Hotel</span>
+          <div class="tl-title">Check-out · limite 11:00</div>
+          <div class="tl-desc">Deixe as malas guardadas na recepção para usar o dia. Confirme com a propriedade.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">09:00</div><div class="tl-dot key"></div><div class="tl-line"></div></div>
+        <div class="tl-body key-event">
+          <span class="tl-tag tag-event">🎓 Evento</span>
+          <div class="tl-title">Seminário ODS — 2º dia (manhã)</div>
+          <div class="tl-desc">Última sessão do evento. Aproveite para trocar contatos com pesquisadores de outras IES.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">12:00</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body">
+          <span class="tl-tag tag-food">Almoço</span>
+          <div class="tl-title">Almoço final do evento ou livre</div>
+          <div class="tl-desc">Boa oportunidade para café com colaboradores antes de retornar.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">18:30</div><div class="tl-dot"></div><div class="tl-line"></div></div>
+        <div class="tl-body transport">
+          <span class="tl-tag tag-transport">Transporte</span>
+          <div class="tl-title">Saída para Aeroporto BSB</div>
+          <div class="tl-desc">Saia com 2h30 de antecedência. Trânsito de Brasília pode ser intenso no fim do dia. Uber recomendado ~R$ 60–80.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-time">21:10</div><div class="tl-dot key"></div><div class="tl-line"></div></div>
+        <div class="tl-body transport key-event">
+          <span class="tl-tag tag-transport">✈ Voo</span>
+          <div class="tl-title">LATAM 3894 · BSB → CGB</div>
+          <div class="tl-desc">Duração: 45 min · Chegada 21:55 em Cuiabá. Bilhete 9572289477388.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =================== FINANCEIRO =================== -->
+  <div class="panel" id="panel-financeiro">
+
+    <div class="budget-bar-wrap" id="budget-summary-bar">
+      <div class="budget-bar-labels">
+        <div><strong id="bs-gasto">R$ 0</strong> gasto / estimado</div>
+        <div>Diária recebida: <strong>R$ 2.700,00</strong></div>
+      </div>
+      <div class="budget-bar">
+        <div class="budget-bar-fill" id="budget-fill" style="width:0%"></div>
+      </div>
+      <div class="budget-legend">
+        <div class="budget-legend-item"><div class="legend-dot" style="background:#2e7d32"></div>Fixo (confirmado)</div>
+        <div class="budget-legend-item"><div class="legend-dot" style="background:#1565c0"></div>Estimado</div>
+        <div class="budget-legend-item"><div class="legend-dot" style="background:#e65100"></div>Opcional</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Planilha de Custos</div>
+    <div class="card" style="overflow-x:auto">
+      <table class="budget-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Tipo</th>
+            <th class="val">R$</th>
+            <th>Obs</th>
+          </tr>
+        </thead>
+        <tbody id="fixed-expenses-tbody">
+          <!-- linhas fixas inseridas via JS -->
+        </tbody>
+        <tbody>
+          <tr class="total-row" id="total-row">
+            <td colspan="2">TOTAL ESTIMADO</td>
+            <td class="val" id="total-fixo">—</td>
+            <td></td>
+          </tr>
+          <tr class="total-row" style="background:#0a3a00">
+            <td colspan="2">SALDO PREVISTO</td>
+            <td class="val" id="saldo-previsto">—</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec-title">Lançar Gasto Real</div>
+    <div class="expense-form">
+      <h3>Registrar despesa</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Descrição</label>
+          <input type="text" id="exp-desc" placeholder="ex: Uber aeroporto">
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="exp-cat">
+            <option value="Transporte">Transporte</option>
+            <option value="Alimentação">Alimentação</option>
+            <option value="Hospedagem">Hospedagem</option>
+            <option value="Evento">Evento</option>
+            <option value="Passeio">Passeio</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valor (R$)</label>
+          <input type="number" id="exp-val" placeholder="0,00" min="0" step="0.01">
+        </div>
+        <button class="btn-add" onclick="addExpense()">＋ Lançar</button>
+      </div>
+    </div>
+
+    <div class="sec-title">Gastos Lançados</div>
+    <div class="card">
+      <ul class="expense-list" id="expense-list">
+        <li style="padding:16px;text-align:center;color:var(--muted);font-size:0.85rem">Nenhum gasto lançado ainda.</li>
+      </ul>
+      <div style="padding:12px 12px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:0.85rem">
+        <span style="color:var(--muted)">Total lançado:</span>
+        <strong id="total-lancado" style="font-family:'Syne',sans-serif;font-size:1rem">R$ 0,00</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =================== EVENTO =================== -->
+  <div class="panel" id="panel-evento">
+
+    <div class="alert alert-info">
+      ℹ️ <div><strong>Seminário Nacional · CAPES · 23–24 jun 2026</strong><br>
+      Organizado por CESUPA, UnB e UFPR com apoio da CAPES. Foco no papel da ES no alcance dos ODS e na Agenda 2030.</div>
+    </div>
+
+    <div class="sec-title">Por que este evento importa para você</div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🎯</div>
+      <div>
+        <div class="tip-title">Alinhamento direto com o seu perfil</div>
+        <div class="tip-body">Você coordena projetos que cruzam pesquisa (carbono, água, PM2.5), extensão e pós-graduação (PPGCA, ProfÁgua, consultoria UNESCO). O evento trata exatamente de mensurar e comunicar esse impacto. Vá preparado para apresentar seus números: publicações, projetos ativos, extensão.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🤝</div>
+      <div>
+        <div class="tip-title">Networking estratégico</div>
+        <div class="tip-body">UnB e UFPR são nós centrais de redes nacionais. Pesquisadores de ODS 6 (água), 13 (clima), 15 (biodiversidade) estarão ali. Leve seu CV sucinto e mencione o contrato UNESCO SA-1383/2025, isso abre portas em rodas de pesquisa aplicada.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">📊</div>
+      <div>
+        <div class="tip-title">O que monitorar nas sessões</div>
+        <div class="tip-body">Fique atento a: (1) metodologias de mensuração de impacto em IES — útil para seus relatórios de projetos e extensão; (2) iniciativas de extensão premiadas ou reconhecidas — modelo para Carbono Vivo e Transforma-Ações; (3) relações CAPES-CAPES/UA com programas profissionais — direto para ProfÁgua.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">📝</div>
+      <div>
+        <div class="tip-title">O que levar / preparar</div>
+        <div class="tip-body">
+          — Cartões de visita ou QR do currículo Lattes<br>
+          — Lista dos projetos ativos (Carbono Vivo, Transforma-Ações, BRASA, UNESCO)<br>
+          — 1 slide / infográfico com indicadores de impacto se houver chance de apresentação relâmpago<br>
+          — Bloco para notas de contatos (nome, instituição, tema, e-mail)
+        </div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">💡</div>
+      <div>
+        <div class="tip-title">Perguntas para fazer nas sessões</div>
+        <div class="tip-body">
+          "Como IES de regiões remotas podem documentar impacto ambiental como contribuição aos ODS sem a estrutura de metrópoles?"<br><br>
+          "Há espaço no framework da CAPES para reconhecer impactos em biomas específicos (Pantanal) como indicadores de ODS 13/15?"
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">Anotações do Evento</div>
+    <div class="card">
+      <textarea class="notes-area" id="event-notes" placeholder="Anote aqui: contatos feitos, sessões interessantes, ideias de projetos, follow-ups..."></textarea>
+      <button class="btn-save" onclick="saveNotes('event-notes','event_notes')">Salvar notas</button>
+    </div>
+
+  </div>
+
+  <!-- =================== BRASÍLIA =================== -->
+  <div class="panel" id="panel-passeios">
+
+    <div class="alert alert-ok">
+      ✅ <div>Você tem as manhãs/tardes de 22 jun (chegada) e 24 jun (antes do voo às 21:10) livres. O roteiro abaixo prioriza o que fica perto do hotel e da CAPES.</div>
+    </div>
+
+    <div class="sec-title">Próximos ao Hotel / Asa Norte</div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🗼</div>
+      <div>
+        <div class="tip-title">Torre de TV de Brasília</div>
+        <div class="tip-body">15 minutos do hotel. Mirante gratuito com vista panorâmica do Eixo Monumental e do Congresso. Vale pelo amanhecer ou entardecer. Leva ~30 min de visita. Não precisa de reserva.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🏛️</div>
+      <div>
+        <div class="tip-title">Esplanada dos Ministérios + Congresso Nacional</div>
+        <div class="tip-body">Caminhada pelo Eixo Monumental até a Praça dos Três Poderes. Visita externa às 18h tem luz dourada ótima para fotos. Palácio do Planalto e STF ficam na mesma praça. ~1h.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🌿</div>
+      <div>
+        <div class="tip-title">Parque Olhos d'Água (Asa Norte)</div>
+        <div class="tip-body">A 5 minutos do hotel. Área verde urbana com nascentes, trilha fácil e patos. Ótimo para descomprimir após o seminário. Entrada gratuita. Abre até 19h.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🎨</div>
+      <div>
+        <div class="tip-title">Museu Nacional Honestino Guimarães</div>
+        <div class="tip-body">Na beira do Lago Paranoá, projeto de Oscar Niemeyer. Exposições gratuitas. ~20 min do hotel. Fechado às segundas. Combine com a Biblioteca Nacional Leonel Brizola ao lado.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🦜</div>
+      <div>
+        <div class="tip-title">Jardim Botânico de Brasília</div>
+        <div class="tip-body">Cerrado nativo em plena capital. Trilhas, orquidário, lago. Para quem é biólogo e pesquisa biomas, é parada obrigatória se o tempo permitir. ~30 min de Uber. Melhor no período da manhã.</div>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-icon">🍺</div>
+      <div>
+        <div class="tip-title">Pontão do Lago Sul / CLN 406 Norte</div>
+        <div class="tip-body">Para o jantar do 1º dia com colegas: CLN 406 Norte tem boa concentração de restaurantes a 10 min do hotel. Pontão do Lago Sul é mais longe mas tem vista bonita para a noite de encerramento.</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Anotações de Passeios</div>
+    <div class="card">
+      <textarea class="notes-area" id="leisure-notes" placeholder="O que você quer visitar, horários, contatos de lugares..."></textarea>
+      <button class="btn-save" onclick="saveNotes('leisure-notes','leisure_notes')">Salvar</button>
+    </div>
+
+  </div>
+
+  <!-- =================== DOCS =================== -->
+  <div class="panel" id="panel-docs">
+
+    <div class="sec-title">Reservas Confirmadas</div>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">✈ Voo Ida</div>
+        <div class="info-value">LATAM 3113 <small>CGB→BSB</small></div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">22/06 · 17:05–19:45</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">✈ Voo Volta</div>
+        <div class="info-value">LATAM 3894 <small>BSB→CGB</small></div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">24/06 · 21:10–21:55</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🏨 Hotel</div>
+        <div class="info-value">OZPED Saint Moritz</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">22–24 jun · Check-out 11h</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🔖 Confirmação Booking</div>
+        <div class="info-value">6051270032</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">PIN: 8763 (Confidencial)</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">📍 Localizador Aéreo</div>
+        <div class="info-value">OEBOAF</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">LATAM · Bilhete 9572289477388</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">📍 Endereço Hotel</div>
+        <div class="info-value" style="font-size:0.85rem">SHN Asa Norte</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">CEP 70740-610 · Tel +55 21 9664-6...</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Contatos de Emergência</div>
+    <div class="card">
+      <table style="width:100%;font-size:0.85rem;border-collapse:collapse">
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 4px;color:var(--muted);width:40%">Bilacorp (emergência)</td>
+          <td style="padding:9px 4px;font-weight:500">(11) 91165-3378 · WhatsApp</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 4px;color:var(--muted)">Bilacorp (comercial)</td>
+          <td style="padding:9px 4px;font-weight:500">(11) 2897-9765</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 4px;color:var(--muted)">UNEMAT / Solicitante</td>
+          <td style="padding:9px 4px;font-weight:500">Jocinei · (65) 98120-0239</td>
+        </tr>
+        <tr>
+          <td style="padding:9px 4px;color:var(--muted)">Hotel (Booking)</td>
+          <td style="padding:9px 4px;font-weight:500">+55 21 9664-6...</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="sec-title">Checklist Pré-Viagem</div>
+    <div class="card">
+      <ul class="checklist" id="checklist">
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Check-in online LATAM (disponível 24h antes)<span class="check-sub">Localizador OEBOAF · Voo 3113 e 3894</span></span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Confirmação de inscrição no Seminário (even3.com.br)</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Documentos impressos: RG ou passaporte, voucher hotel, voucher aéreo</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Carregador notebook / celular + adaptador universal</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Roupas para 2 dias de evento (mais formal) + 1 casual</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Cartões de visita ou QR do Lattes</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Informar à Barbara horários de voo e contato do hotel</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Mochila de mão (sem despacho — tarifa Light)</span>
+        </li>
+        <li class="check-item" onclick="toggleCheck(this)">
+          <input type="checkbox"><span class="check-text">Guardar nota fiscal de todas as despesas (ressarcimento UNEMAT)</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sec-title">Notas Gerais</div>
+    <div class="card">
+      <textarea class="notes-area" id="general-notes" placeholder="Informações que você queira guardar, instruções do hotel, contatos novos..."></textarea>
+      <button class="btn-save" onclick="saveNotes('general-notes','general_notes')">Salvar</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const BUDGET_TOTAL = 2700;
+
+// ─── FIXED BUDGET ITEMS ───────────────────────────────────────────────
+const fixedItems = [
+  { desc: 'Hospedagem (2 noites) · OZPED Saint Moritz', cat: 'fixed', val: 526.69, obs: 'Pago em 08/06 · Booking 6051270032' },
+  { desc: 'Uber/Táxi aeroporto → hotel (ida)', cat: 'est', val: 70, obs: 'BSB → SHN Asa Norte ~30 min' },
+  { desc: 'Uber/Táxi hotel → aeroporto (volta)', cat: 'est', val: 70, obs: 'SHN → BSB com margem de trânsito' },
+  { desc: 'Uber hotel → CAPES (2 dias × 2)', cat: 'est', val: 80, obs: 'R$20/corrida estimado' },
+  { desc: 'Alimentação (café/almoço/jantar × 3 dias)', cat: 'est', val: 300, obs: 'R$100/dia estimado' },
+  { desc: 'Passeios / entradas museus', cat: 'opt', val: 50, obs: 'Museus grátis; opcional transporte' },
+  { desc: 'Imprevistos / outros', cat: 'est', val: 100, obs: 'Reserva de segurança' },
+];
+
+function renderFixedItems() {
+  const tbody = document.getElementById('fixed-expenses-tbody');
+  let total = 0;
+  tbody.innerHTML = '';
+  fixedItems.forEach(item => {
+    total += item.val;
+    const catLabel = item.cat === 'fixed' ? '<span class="cat cat-fixed">Fixo</span>' :
+                     item.cat === 'est'   ? '<span class="cat cat-est">Estimado</span>' :
+                                            '<span class="cat cat-opt">Opcional</span>';
+    const row = document.createElement('tr');
+    row.className = item.cat === 'fixed' ? 'fixed' : item.cat === 'est' ? 'estimated' : 'optional';
+    row.innerHTML = `
+      <td>${item.desc}</td>
+      <td>${catLabel}</td>
+      <td class="val">R$ ${item.val.toFixed(2).replace('.',',')}</td>
+      <td style="color:var(--muted);font-size:0.78rem">${item.obs}</td>
+    `;
+    tbody.appendChild(row);
+  });
+  document.getElementById('total-fixo').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  const saldo = BUDGET_TOTAL - total;
+  const saldoEl = document.getElementById('saldo-previsto');
+  saldoEl.textContent = 'R$ ' + saldo.toFixed(2).replace('.',',');
+  saldoEl.style.color = saldo >= 0 ? '#00b87a' : '#ff4a1c';
+  updateBudgetBar(total);
+}
+
+function updateBudgetBar(estimado) {
+  const pct = Math.min((estimado / BUDGET_TOTAL) * 100, 100);
+  document.getElementById('budget-fill').style.width = pct + '%';
+  document.getElementById('budget-fill').style.background = pct > 90 ? '#e65100' : pct > 70 ? '#e8a000' : '#00b87a';
+  document.getElementById('bs-gasto').textContent = 'R$ ' + estimado.toFixed(2).replace('.',',');
+  const saldo = BUDGET_TOTAL - estimado;
+  const el = document.getElementById('header-saldo');
+  el.textContent = 'R$ ' + saldo.toFixed(2).replace('.',',');
+  el.className = 'saldo ' + (saldo >= 500 ? 'ok' : saldo >= 0 ? 'warn' : 'over');
+}
+
+// ─── REAL EXPENSES ────────────────────────────────────────────────────
+let expenses = JSON.parse(localStorage.getItem('bsb_expenses') || '[]');
+
+function saveExpenses() {
+  localStorage.setItem('bsb_expenses', JSON.stringify(expenses));
+}
+
+function addExpense() {
+  const desc = document.getElementById('exp-desc').value.trim();
+  const cat  = document.getElementById('exp-cat').value;
+  const val  = parseFloat(document.getElementById('exp-val').value);
+  if (!desc || isNaN(val) || val <= 0) return;
+  expenses.push({ id: Date.now(), desc, cat, val });
+  saveExpenses();
+  document.getElementById('exp-desc').value = '';
+  document.getElementById('exp-val').value = '';
+  renderExpenses();
+}
+
+function deleteExpense(id) {
+  expenses = expenses.filter(e => e.id !== id);
+  saveExpenses();
+  renderExpenses();
+}
+
+function renderExpenses() {
+  const list = document.getElementById('expense-list');
+  if (expenses.length === 0) {
+    list.innerHTML = '<li style="padding:16px;text-align:center;color:var(--muted);font-size:0.85rem">Nenhum gasto lançado ainda.</li>';
+    document.getElementById('total-lancado').textContent = 'R$ 0,00';
+    return;
+  }
+  let total = 0;
+  list.innerHTML = expenses.map(e => {
+    total += e.val;
+    return `<li class="expense-item">
+      <div class="expense-desc">
+        <div>${e.desc}</div>
+        <div class="expense-cat">${e.cat}</div>
+      </div>
+      <div class="expense-val">R$ ${e.val.toFixed(2).replace('.',',')}</div>
+      <button class="btn-del" onclick="deleteExpense(${e.id})">✕</button>
+    </li>`;
+  }).join('');
+  document.getElementById('total-lancado').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+
+  // Update header saldo based on real expenses
+  const saldo = BUDGET_TOTAL - total;
+  const el = document.getElementById('header-saldo');
+  el.textContent = 'R$ ' + saldo.toFixed(2).replace('.',',');
+  el.className = 'saldo ' + (saldo >= 500 ? 'ok' : saldo >= 0 ? 'warn' : 'over');
+  document.getElementById('bs-gasto').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  const pct = Math.min((total / BUDGET_TOTAL) * 100, 100);
+  document.getElementById('budget-fill').style.width = pct + '%';
+  document.getElementById('budget-fill').style.background = pct > 90 ? '#e65100' : pct > 70 ? '#e8a000' : '#00b87a';
+}
+
+// ─── CHECKLIST ────────────────────────────────────────────────────────
+let checkState = JSON.parse(localStorage.getItem('bsb_checks') || '{}');
+
+function toggleCheck(item) {
+  const cb = item.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  item.classList.toggle('done', cb.checked);
+  const key = item.querySelector('.check-text').textContent.slice(0, 30);
+  checkState[key] = cb.checked;
+  localStorage.setItem('bsb_checks', JSON.stringify(checkState));
+}
+
+function loadChecks() {
+  document.querySelectorAll('#checklist .check-item').forEach(item => {
+    const key = item.querySelector('.check-text').textContent.slice(0, 30);
+    if (checkState[key]) {
+      item.querySelector('input').checked = true;
+      item.classList.add('done');
+    }
+  });
+}
+
+// ─── NOTES ────────────────────────────────────────────────────────────
+function saveNotes(textareaId, storageKey) {
+  const val = document.getElementById(textareaId).value;
+  localStorage.setItem('bsb_' + storageKey, val);
+  const btn = event.target;
+  btn.textContent = '✓ Salvo!';
+  setTimeout(() => btn.textContent = 'Salvar', 1500);
+}
+
+function loadNotes() {
+  ['event-notes:event_notes', 'leisure-notes:leisure_notes', 'general-notes:general_notes'].forEach(pair => {
+    const [id, key] = pair.split(':');
+    const val = localStorage.getItem('bsb_' + key);
+    if (val) document.getElementById(id).value = val;
+  });
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  localStorage.setItem('bsb_tab', id);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────
+renderFixedItems();
+renderExpenses();
+loadChecks();
+loadNotes();
+
+const savedTab = localStorage.getItem('bsb_tab');
+if (savedTab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + savedTab)?.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick')?.includes(savedTab)) b.classList.add('active');
+  });
+}
+</script>
+</body>
+</html>
